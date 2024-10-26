@@ -1,6 +1,5 @@
 com\carpooling\controller\DatabaseTestServlet.class
 com\carpooling\dao\RideDAO.class
-com\carpooling\controller\CreateRideServlet$JsonResponse.class
 com\carpooling\model\User.class
 com\carpooling\controller\LoginServlet.class
 com\carpooling\controller\MyRidesServlet.class

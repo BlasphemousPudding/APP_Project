@@ -46,7 +46,7 @@
                 <%= request.getAttribute("error") %>
             </div>
         <% } %>
-        <form id="createRideForm" action="${pageContext.request.contextPath}/createRide" method="post" enctype="multipart/form-data">
+        <form action="${pageContext.request.contextPath}/createRide" method="post" enctype="multipart/form-data">
             <div class="mb-3">
                 <label for="origin" class="form-label">Origin:</label>
                 <input type="text" class="form-control" id="origin" name="origin" required>
