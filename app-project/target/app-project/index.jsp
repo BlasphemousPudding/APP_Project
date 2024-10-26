@@ -111,7 +111,7 @@
         </div>
     </div>
     <div class="search-container">
-        <form class="search-form">
+        <form class="search-form" onsubmit="return handleSearch(event)">
             <input type="text" placeholder="Leaving from" required>
             <input type="text" placeholder="Going to" required>
             <input type="date" required>
@@ -147,6 +147,13 @@
         // Set min date for the date input to today
         var today = new Date().toISOString().split('T')[0];
         document.querySelector('input[type="date"]').setAttribute('min', today);
+
+        function handleSearch(event) {
+            event.preventDefault();
+            // Redirect to the login page
+            window.location.href = "<%= request.getContextPath() %>/login";
+            return false;
+        }
     </script>
 </body>
 </html>

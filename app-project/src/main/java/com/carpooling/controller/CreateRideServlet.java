@@ -2,62 +2,114 @@ package com.carpooling.controller;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+
 import java.io.IOException;
-import com.carpooling.dao.RideDAO;  // Import the RideDAO class
-import com.carpooling.model.Ride; 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.logging.Level;
 
-@WebServlet("/createRide") // URL mapping for the servlet
+import com.carpooling.dao.RideDAO;
+import com.carpooling.model.Ride;
+import com.carpooling.util.LogUtil;
+import com.google.gson.Gson;
+
+@WebServlet("/createRide")
+@MultipartConfig
 public class CreateRideServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    private Gson gson = new Gson();
 
-    // Add doGet method to handle GET requests
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Forward to the createRide.jsp page
-        request.getRequestDispatcher("/WEB-INF/view/createRide.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/view/createRideForm.jsp").forward(request, response);
     }
 
-    // Existing doPost method to handle POST requests for creating a ride
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        System.out.println("CreateRideServlet doPost method called");
+        response.setContentType("application/json");
+        HttpSession session = request.getSession(false);
+
+        LogUtil.log(Level.INFO, "Received a POST request to CreateRideServlet");
+        LogUtil.log(Level.INFO, "Request Content Type: " + request.getContentType());
+
+        if (session == null || session.getAttribute("userId") == null) {
+            LogUtil.log(Level.WARNING, "User not logged in");
+            sendJsonResponse(response, false, "Please login first");
+            return;
+        }
+
         try {
-            // Retrieve form parameters from the request
             String origin = request.getParameter("origin");
             String destination = request.getParameter("destination");
-            String dateTime = request.getParameter("date_time");
-            int availableSeats = Integer.parseInt(request.getParameter("available_seats"));
-            String comments = request.getParameter("comments");
-            double originLat = Double.parseDouble(request.getParameter("origin_latitude"));
-            double originLng = Double.parseDouble(request.getParameter("origin_longitude"));
-            double destLat = Double.parseDouble(request.getParameter("destination_latitude"));
-            double destLng = Double.parseDouble(request.getParameter("destination_longitude"));
+            String dateTimeString = request.getParameter("date_time");
+            String availableSeatsString = request.getParameter("available_seats");
+            String priceString = request.getParameter("price");
 
-            // Retrieve the driverId from session (ensure session has the userId attribute)
-            Object userIdObj = request.getSession().getAttribute("userId");
-            if (userIdObj == null) {
-                response.sendRedirect("login.jsp?error=Please%20login%20first");
-                return;
+            LogUtil.log(Level.INFO, "Received parameters:");
+            LogUtil.log(Level.INFO, "origin: " + origin);
+            LogUtil.log(Level.INFO, "destination: " + destination);
+            LogUtil.log(Level.INFO, "date_time: " + dateTimeString);
+            LogUtil.log(Level.INFO, "available_seats: " + availableSeatsString);
+            LogUtil.log(Level.INFO, "price: " + priceString);
+
+            if (dateTimeString == null || dateTimeString.trim().isEmpty()) {
+                LogUtil.log(Level.WARNING, "Date and time is empty or null");
+                throw new IllegalArgumentException("Date and time must be provided");
             }
-            int driverId = (int) userIdObj;
 
-            // Create a new Ride object and save it in the database
-            Ride ride = new Ride(driverId, origin, destination, dateTime, availableSeats, comments, originLat, originLng, destLat, destLng);
-            boolean isCreated = RideDAO.createRide(ride);
+            int driverId = (int) session.getAttribute("userId");
+            LocalDateTime dateTime = LocalDateTime.parse(dateTimeString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            int availableSeats = Integer.parseInt(availableSeatsString);
+            double price = Double.parseDouble(priceString);
+            String status = "scheduled"; // Default status
 
-            // Redirect to appropriate page based on success or failure
-            if (isCreated) {
-                response.sendRedirect("dashboard.jsp?message=Ride%20created%20successfully");
+            Ride ride = new Ride(driverId, origin, destination, dateTime, availableSeats, price, status);
+            LogUtil.log(Level.INFO, "Ride object created: " + ride);
+
+            if (RideDAO.createRide(ride)) {
+                LogUtil.log(Level.INFO, "Ride created successfully, redirecting to /myRides");
+                response.sendRedirect(request.getContextPath() + "/myRides");
             } else {
-                response.sendRedirect("createRide.jsp?error=Failed%20to%20create%20ride");
+                LogUtil.log(Level.WARNING, "Failed to create ride in database");
+                request.setAttribute("error", "Failed to create ride in database");
+                request.getRequestDispatcher("/WEB-INF/view/createRideForm.jsp").forward(request, response);
             }
-        } catch (NumberFormatException e) {
-            // Handle any number format exceptions for parsing integers or doubles
-            response.sendRedirect("createRide.jsp?error=Invalid%20input%20format.%20Please%20check%20your%20inputs.");
         } catch (Exception e) {
+            LogUtil.log(Level.SEVERE, "Exception in CreateRideServlet: " + e.getMessage());
             e.printStackTrace();
-            response.sendRedirect("createRide.jsp?error=An%20unexpected%20error%20occurred.%20Please%20try%20again.");
+            request.setAttribute("error", "An unexpected error occurred: " + e.getMessage());
+            request.getRequestDispatcher("/WEB-INF/view/createRideForm.jsp").forward(request, response);
+        }
+    }
+
+    private void sendJsonResponse(HttpServletResponse response, boolean success, String message) throws IOException {
+        String json = gson.toJson(new JsonResponse(success, message));
+        response.getWriter().write(json);
+    }
+
+    private static class JsonResponse {
+        private final boolean success;
+        private final String message;
+
+        JsonResponse(boolean success, String message) {
+            this.success = success;
+            this.message = message;
+        }
+
+        @SuppressWarnings("unused")
+        public boolean isSuccess() {
+            return success;
+        }
+
+        @SuppressWarnings("unused")
+        public String getMessage() {
+            return message;
         }
     }
 }

@@ -1,6 +1,12 @@
-com\carpooling\controller\RegisterServlet.class
 com\carpooling\controller\DatabaseTestServlet.class
 com\carpooling\dao\RideDAO.class
+com\carpooling\controller\CreateRideServlet$JsonResponse.class
+com\carpooling\model\User.class
+com\carpooling\controller\LoginServlet.class
+com\carpooling\controller\MyRidesServlet.class
+com\carpooling\controller\RegisterServlet.class
+com\carpooling\controller\ErrorHandlerServlet.class
+com\carpooling\util\LogUtil.class
 com\carpooling\controller\CreateRideServlet.class
 com\carpooling\controller\ViewController.class
 com\carpooling\dao\UserDAO.class
@@ -8,5 +14,3 @@ com\carpooling\util\DatabaseUtil.class
 com\carpooling\controller\DashboardServlet.class
 com\carpooling\model\Ride.class
 com\carpooling\controller\TestServlet.class
-com\carpooling\model\User.class
-com\carpooling\controller\LoginServlet.class

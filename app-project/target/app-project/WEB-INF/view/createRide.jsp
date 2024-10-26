@@ -3,56 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Ride</title>
-    <!-- Include Google Maps API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=3d1798bb3c6ad9e84dd74ce46e1b3b6f&libraries=places"></script>
-    <script>
-        function initMap() {
-            var originInput = document.getElementById('origin');
-            var destinationInput = document.getElementById('destination');
-
-            var options = { componentRestrictions: { country: "us" } }; // Adjust to your country
-
-            var originAutocomplete = new google.maps.places.Autocomplete(originInput, options);
-            var destinationAutocomplete = new google.maps.places.Autocomplete(destinationInput, options);
-
-            originAutocomplete.addListener('place_changed', function() {
-                var place = originAutocomplete.getPlace();
-                document.getElementById('origin_latitude').value = place.geometry.location.lat();
-                document.getElementById('origin_longitude').value = place.geometry.location.lng();
-            });
-
-            destinationAutocomplete.addListener('place_changed', function() {
-                var place = destinationAutocomplete.getPlace();
-                document.getElementById('destination_latitude').value = place.geometry.location.lat();
-                document.getElementById('destination_longitude').value = place.geometry.location.lng();
-            });
+    <title>Create a Ride</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
         }
-    </script>
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        form {
+            display: grid;
+            gap: 20px;
+        }
+        label {
+            font-weight: bold;
+            color: #34495e;
+        }
+        input[type="text"],
+        input[type="datetime-local"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        input[type="submit"] {
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        input[type="submit"]:hover {
+            background-color: #2980b9;
+        }
+    </style>
 </head>
-<body onload="initMap()">
-    <h2>Create a New Ride</h2>
-    <form action="createRide" method="post">
-        <label for="origin">Origin:</label>
-        <input type="text" id="origin" name="origin" required>
-        <input type="hidden" id="origin_latitude" name="origin_latitude">
-        <input type="hidden" id="origin_longitude" name="origin_longitude">
+<body>
+    <div class="container">
+        <h1>Create a Ride</h1>
+        <form action="${pageContext.request.contextPath}/createRide" method="post" enctype="multipart/form-data">
+            <div>
+                <label for="origin">Origin:</label>
+                <input type="text" id="origin" name="origin" required>
+            </div>
 
-        <label for="destination">Destination:</label>
-        <input type="text" id="destination" name="destination" required>
-        <input type="hidden" id="destination_latitude" name="destination_latitude">
-        <input type="hidden" id="destination_longitude" name="destination_longitude">
+            <div>
+                <label for="destination">Destination:</label>
+                <input type="text" id="destination" name="destination" required>
+            </div>
 
-        <label for="date_time">Date & Time:</label>
-        <input type="datetime-local" id="date_time" name="date_time" required>
+            <div>
+                <label for="date_time">Date and Time:</label>
+                <input type="datetime-local" id="date_time" name="date_time" required>
+            </div>
 
-        <label for="available_seats">Available Seats:</label>
-        <input type="number" id="available_seats" name="available_seats" required>
+            <div>
+                <label for="available_seats">Available Seats:</label>
+                <input type="number" id="available_seats" name="available_seats" required>
+            </div>
 
-        <label for="comments">Comments:</label>
-        <textarea id="comments" name="comments"></textarea>
+            <div>
+                <label for="price">Price per Seat:</label>
+                <input type="number" step="0.01" id="price" name="price" required>
+            </div>
 
-        <button type="submit">Create Ride</button>
-    </form>
+            <input type="submit" value="Create Ride">
+        </form>
+    </div>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = this;
+            const formData = new FormData(form);
+
+            console.log("Form data:");
+            for (let [key, value] of formData.entries()) {
+                console.log(key + ': ' + value);
+            }
+
+            console.log("date_time value:", form.elements['date_time'].value);
+
+            fetch(form.action, {
+                method: form.method,
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Server response:", data);
+                if (data.success) {
+                    window.location.href = '${pageContext.request.contextPath}/myRides';
+                } else {
+                    alert('Form submission was not successful: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while submitting the form.');
+            });
+        });
+    </script>
 </body>
 </html>
