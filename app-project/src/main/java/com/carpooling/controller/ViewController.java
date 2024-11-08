@@ -8,7 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet(urlPatterns = {"/rideManagement", "/searchRides", "/admin", "/review"})
+@WebServlet(urlPatterns = {"/rideManagement", "/admin", "/review"})
 public class ViewController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -16,12 +16,8 @@ public class ViewController extends HttpServlet {
 
         String view = "";
         switch (path) {
-       
             case "/rideManagement":
                 view = "/WEB-INF/view/rideManagement.jsp";
-                break;
-            case "/searchRides":
-                view = "/WEB-INF/view/searchRides.jsp";
                 break;
             case "/admin":
                 view = "/WEB-INF/view/admin.jsp";

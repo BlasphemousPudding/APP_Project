@@ -97,7 +97,7 @@
             <ul>
                 <li><a href="${pageContext.request.contextPath}/createRide"><i class="fas fa-plus"></i> New Ride</a></li>
                 <li><a href="${pageContext.request.contextPath}/myRides"><i class="fas fa-list"></i> My Rides</a></li>
-                <li><a href="searchRide.jsp"><i class="fas fa-search"></i> Search</a></li>
+                <li><a href="${pageContext.request.contextPath}/searchAvailableRides">Search Rides</a></li>
                 <li><a href="logout"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
             </ul>
         </nav>

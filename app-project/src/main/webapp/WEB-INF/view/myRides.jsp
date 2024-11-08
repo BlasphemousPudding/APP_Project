@@ -10,6 +10,10 @@
             color: blue;
             font-weight: bold;
         }
+        .status-confirmed {
+            color: green;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -37,11 +41,11 @@
                             <td>${ride.price}</td>
                             <td>
                                 <c:choose>
-                                    <c:when test="${ride.status == 'scheduled'}">
-                                        <span class="status-available">Available</span>
+                                    <c:when test="${ride.status eq 'Confirmed'}">
+                                        <span class="status-confirmed">Confirmed</span>
                                     </c:when>
                                     <c:otherwise>
-                                        ${ride.status}
+                                        <span class="status-available">Available</span>
                                     </c:otherwise>
                                 </c:choose>
                             </td>
